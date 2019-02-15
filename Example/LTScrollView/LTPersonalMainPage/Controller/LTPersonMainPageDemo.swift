@@ -66,10 +66,10 @@ class LTPersonMainPageDemo: UIViewController {
         return layout
     }()
     
-    private lazy var simpleManager: LTSimpleManager = {
+    private lazy var simpleManager: KFScrollableContainerView = {
         let Y: CGFloat = 0.0
         let H: CGFloat = glt_iphoneX ? (view.bounds.height - 34) : view.bounds.height
-        let simpleManager = LTSimpleManager(frame: CGRect(x: 0, y: Y, width: view.bounds.width, height: H), viewControllers: viewControllers, titles: titles, currentViewController: self, layout: layout)
+        let simpleManager = KFScrollableContainerView(frame: CGRect(x: 0, y: Y, width: view.bounds.width, height: H), viewControllers: viewControllers, titles: titles, currentViewController: self, layout: layout)
         
         /* 设置代理 监听滚动 */
         simpleManager.delegate = self
@@ -125,7 +125,7 @@ extension LTPersonMainPageDemo {
     }
 }
 
-extension LTPersonMainPageDemo: LTSimpleScrollViewDelegate {
+extension LTPersonMainPageDemo: KFScrollableContainerViewDelegate {
     
     //MARK: 滚动代理方法
     func glt_scrollViewDidScroll(_ scrollView: UIScrollView) {

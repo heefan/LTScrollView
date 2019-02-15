@@ -5,29 +5,21 @@
 //  Created by 高刘通 on 2018/2/3.
 //  Copyright © 2018年 LT. All rights reserved.
 //
-//  如有疑问，欢迎联系本人QQ: 1282990794
-//
-//  ScrollView嵌套ScrolloView解决方案（初级、进阶)， 支持OC/Swift
-//
-//  github地址: https://github.com/gltwy/LTScrollView
-//
-//  clone地址:  https://github.com/gltwy/LTScrollView.git
-//
 private let glt_iphoneX = (UIScreen.main.bounds.height >= 812.0)
 
 import UIKit
 import MJRefresh
 
-class LTSimpleManagerDemo: UIViewController {
+class MyAccountViewController: UIViewController {
     
     private lazy var titles: [String] = {
-        return ["热门", "精彩推荐", "科技控", "游戏"]
+        return ["dot0", "dot1", "dot2"]
     }()
     
-    private lazy var viewControllers: [UIViewController] = {
+    private lazy var pageViewControllers: [UIViewController] = {
         var vcs = [UIViewController]()
         for _ in titles {
-            vcs.append(LTSimpleTestOneVC())
+            vcs.append(PageViewController())
         }
         return vcs
     }()
@@ -36,7 +28,6 @@ class LTSimpleManagerDemo: UIViewController {
         let layout = LTLayout()
         layout.bottomLineHeight = 4.0
         layout.bottomLineCornerRadius = 2.0
-        /* 更多属性设置请参考 LTLayout 中 public 属性说明 */
         return layout
     }()
     
@@ -48,24 +39,27 @@ class LTSimpleManagerDemo: UIViewController {
     }
     
     /*
-    // 取消注释此处为自定义titleView
+     // 取消注释此处为自定义titleView
      private lazy var simpleManager: LTSimpleManager = {
      let customTitleView = LTCustomTitleView(frame: CGRect(x: 0, y: 0, width: view.bounds.width, height: 44), titles: titles, layout: layout)
      customTitleView.isCustomTitleView = true
-     let simpleManager = LTSimpleManager(frame: managerReact(), viewControllers: viewControllers, titles: titles, currentViewController: self, layout: layout, titleView: customTitleView)
+     let simpleManager = LTSimpleManager(frame: managerReact(), pageViewControllers: pageViewControllers, titles: titles, currentViewController: self, layout: layout, titleView: customTitleView)
      /* 设置代理 监听滚动 */
      simpleManager.delegate = self
      return simpleManager
      }()
-    */
- 
+     */
+
     
 
-    private lazy var simpleManager: LTSimpleManager = {
-        let simpleManager = LTSimpleManager(frame: managerReact(), viewControllers: viewControllers, titles: titles, currentViewController: self, layout: layout)
-        /* 设置代理 监听滚动 */
-        simpleManager.delegate = self
-        return simpleManager
+    private lazy var containerView: KFScrollableContainerView = {
+        let simpleManagerView = KFScrollableContainerView(frame: managerReact(),
+                                                    viewControllers: pageViewControllers,
+                                                    titles: titles,
+                                                    currentViewController: self,
+                                                    layout: layout)
+        simpleManagerView.delegate = self
+        return simpleManagerView
     }()
     
     
@@ -73,13 +67,12 @@ class LTSimpleManagerDemo: UIViewController {
         super.viewDidLoad()
         view.backgroundColor = UIColor.white
         self.automaticallyAdjustsScrollViewInsets = false
-        view.addSubview(simpleManager)
-        simpleManagerConfig()
+        view.addSubview(containerView)
+        containerViewConfig()
     }
     
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
     }
     
     deinit {
@@ -88,21 +81,17 @@ class LTSimpleManagerDemo: UIViewController {
 }
 
 
-extension LTSimpleManagerDemo {
+extension MyAccountViewController {
     
-    //MARK: 具体使用请参考以下
-    private func simpleManagerConfig() {
-        
-        //MARK: headerView设置
-        simpleManager.configHeaderView {[weak self] in
+    private func containerViewConfig() {
+        containerView.configHeaderView {[weak self] in
             guard let strongSelf = self else { return nil }
             let headerView = strongSelf.testLabel()
             return headerView
         }
         
-        //MARK: pageView点击事件
-        simpleManager.didSelectIndexHandle { (index) in
-            print("点击了 \(index) 😆")
+        containerView.didSelectIndexHandle { (index) in
+            print("page \(index) 😆")
         }
         
     }
@@ -112,7 +101,7 @@ extension LTSimpleManagerDemo {
     }
 }
 
-extension LTSimpleManagerDemo: LTSimpleScrollViewDelegate {
+extension MyAccountViewController: KFScrollableContainerViewDelegate {
     
     //MARK: 滚动代理方法
     func glt_scrollViewDidScroll(_ scrollView: UIScrollView) {
@@ -131,11 +120,11 @@ extension LTSimpleManagerDemo: LTSimpleScrollViewDelegate {
     }
 }
 
-extension LTSimpleManagerDemo {
+extension MyAccountViewController {
     private func testLabel() -> UILabel {
         let headerView = UILabel(frame: CGRect(x: 0, y: 0, width: self.view.bounds.width, height: 180))
         headerView.backgroundColor = UIColor.red
-        headerView.text = "点击响应事件"
+        headerView.text = "header view clicked"
         headerView.textColor = UIColor.white
         headerView.textAlignment = .center
         headerView.isUserInteractionEnabled = true

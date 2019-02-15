@@ -71,7 +71,7 @@ extension ViewController: UITableViewDelegate, UITableViewDataSource {
         tableView.deselectRow(at: indexPath, animated: true)
         switch indexPath.row {
         case 0:
-            pushVc(LTSimpleManagerDemo(), index: indexPath.row)
+            pushVc(MyAccountViewController(), index: indexPath.row)
             break
         case 1:
             pushVc(LTAdvancedManagerDemo(), index: indexPath.row)

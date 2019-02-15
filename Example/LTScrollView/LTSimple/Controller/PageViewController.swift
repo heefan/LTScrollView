@@ -19,7 +19,7 @@ import UIKit
 import MJRefresh
 private let glt_iphoneX = (UIScreen.main.bounds.height >= 812.0)
 
-class LTSimpleTestOneVC: UIViewController, LTTableViewProtocal {
+class PageViewController: UIViewController, LTTableViewProtocal {
     
     private lazy var tableView: UITableView = {
 //         如果设置了layout.isHovered = false不悬停 此处Y的值应该从0开始 高度再加上sliderHeight 即：
@@ -47,7 +47,7 @@ class LTSimpleTestOneVC: UIViewController, LTTableViewProtocal {
     }
 }
 
-extension LTSimpleTestOneVC {
+extension PageViewController {
     fileprivate func reftreshData()  {
         self.tableView.mj_footer = MJRefreshBackNormalFooter {[weak self] in
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.0, execute: {
@@ -59,7 +59,7 @@ extension LTSimpleTestOneVC {
 }
 
 
-extension LTSimpleTestOneVC: UITableViewDelegate, UITableViewDataSource {
+extension PageViewController: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return 30

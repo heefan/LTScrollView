@@ -8,70 +8,18 @@
  
  import UIKit
  
- @objc public protocol LTSimpleScrollViewDelegate: class {
-    @objc optional func glt_scrollViewDidScroll(_ scrollView: UIScrollView)
-    @objc optional func glt_scrollViewWillBeginDragging(_ scrollView: UIScrollView)
-    @objc optional func glt_scrollViewWillBeginDecelerating(_ scrollView: UIScrollView)
-    @objc optional func glt_scrollViewDidEndDecelerating(_ scrollView: UIScrollView)
-    @objc optional func glt_scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool)
-    @objc optional func glt_scrollViewDidEndScrollingAnimation(_ scrollView: UIScrollView)
-    //刷新tableView的代理方法
-    @objc optional func glt_refreshScrollView(_ scrollView: UIScrollView, _ index: Int);
- }
- 
- public class LTSimpleManager: UIView {
-    
-    /* headerView配置 */
-    @objc public func configHeaderView(_ handle: (() -> UIView?)?) {
-        guard let handle = handle else { return }
-        guard let headerView = handle() else { return }
-        setupHeaderView(headerView: headerView)
-    }
-    
-    /* 动态改变header的高度 */
-    @objc public var glt_headerHeight: CGFloat = 0.0 {
-        didSet {
-            kHeaderHeight = CGFloat(Int(glt_headerHeight))
-            if layout.isHovered == false {
-                hoverY = 0.0
-                kHeaderHeight += self.layout.sliderHeight
-                titleView.frame.origin.y = kHeaderHeight - layout.sliderHeight
-            }
-            headerView?.frame.size.height = kHeaderHeight
-            tableView.tableHeaderView = headerView
-        }
-    }
-    
+ public class KFScrollableContainerView: UIView {
     public typealias LTSimpleDidSelectIndexHandle = (Int) -> Void
-    @objc public var sampleDidSelectIndexHandle: LTSimpleDidSelectIndexHandle?
-    @objc public func didSelectIndexHandle(_ handle: LTSimpleDidSelectIndexHandle?) {
-        sampleDidSelectIndexHandle = handle
-    }
-    
+    public weak var delegate: KFScrollableContainerViewDelegate?
+    public var sampleDidSelectIndexHandle: LTSimpleDidSelectIndexHandle?
     public typealias LTSimpleRefreshTableViewHandle = (UIScrollView, Int) -> Void
-    @objc public var simpleRefreshTableViewHandle: LTSimpleRefreshTableViewHandle?
-    @objc public func refreshTableViewHandle(_ handle: LTSimpleRefreshTableViewHandle?) {
-        simpleRefreshTableViewHandle = handle
-    }
-    
-    /* 代码设置滚动到第几个位置 */
-    @objc public func scrollToIndex(index: Int)  {
-        titleView.scrollToIndex(index: index)
-    }
-    
-    /* 点击切换滚动过程动画  */
-    @objc public var isClickScrollAnimation = false {
-        didSet {
-            titleView.isClickScrollAnimation = isClickScrollAnimation
-        }
-    }
-    
+    public var simpleRefreshTableViewHandle: LTSimpleRefreshTableViewHandle?
+
     //设置悬停位置Y值
-    @objc public var hoverY: CGFloat = 0
-    
+    public var hoverY: CGFloat = 0
+
     /* LTSimple的scrollView上下滑动监听 */
-    @objc public weak var delegate: LTSimpleScrollViewDelegate?
-    
+
     private var contentTableView: UIScrollView?
     private var kHeaderHeight: CGFloat = 0.0
     private var headerView: UIView?
@@ -82,20 +30,14 @@
     private var pageView: LTPageView!
     private var currentSelectIndex: Int = 0
     var isCustomTitleView: Bool = false
-    
+
     private var titleView: LTPageTitleView!
-    
-    private lazy var tableView: LTTableView = {
-        let tableView = LTTableView(frame: CGRect(x: 0, y: 0, width: bounds.width, height: bounds.height), style:.plain)
-        tableView.delegate = self
-        tableView.dataSource = self
-        tableView.showsVerticalScrollIndicator = false
-        tableView.separatorStyle = .none
-        registerCell(tableView, UITableViewCell.self)
-        return tableView
-    }()
-    
-    @objc public init(frame: CGRect, viewControllers: [UIViewController], titles: [String], currentViewController:UIViewController, layout: LTLayout, titleView: LTPageTitleView? = nil) {
+
+    public init(frame: CGRect, viewControllers: [UIViewController], titles: [String],
+                currentViewController:UIViewController,
+                layout: LTLayout,
+                titleView: LTPageTitleView? = nil) {
+
         UIScrollView.initializeOnce()
         self.viewControllers = viewControllers
         self.titles = titles
@@ -114,24 +56,77 @@
         pageView = createPageViewConfig(currentViewController: currentViewController, layout: layout, titleView: titleView)
         createSubViews()
     }
-    
+
     required public init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
+
     deinit {
         deallocConfig()
     }
+
+    /* headerView配置 */
+    public func configHeaderView(_ handle: (() -> UIView?)?) {
+        guard let handle = handle else { return }
+        guard let headerView = handle() else { return }
+        setupHeaderView(headerView: headerView)
+    }
+    
+    /* 动态改变header的高度 */
+    public var glt_headerHeight: CGFloat = 0.0 {
+        didSet {
+            kHeaderHeight = CGFloat(Int(glt_headerHeight))
+            if layout.isHovered == false {
+                hoverY = 0.0
+                kHeaderHeight += self.layout.sliderHeight
+                titleView.frame.origin.y = kHeaderHeight - layout.sliderHeight
+            }
+            headerView?.frame.size.height = kHeaderHeight
+            tableView.tableHeaderView = headerView
+        }
+    }
+    
+    public func didSelectIndexHandle(_ handle: LTSimpleDidSelectIndexHandle?) {
+        sampleDidSelectIndexHandle = handle
+    }
+    
+    public func refreshTableViewHandle(_ handle: LTSimpleRefreshTableViewHandle?) {
+        simpleRefreshTableViewHandle = handle
+    }
+    
+    /* 代码设置滚动到第几个位置 */
+    public func scrollToIndex(index: Int)  {
+        titleView.scrollToIndex(index: index)
+    }
+    
+    /* 点击切换滚动过程动画  */
+    public var isClickScrollAnimation = false {
+        didSet {
+            titleView.isClickScrollAnimation = isClickScrollAnimation
+        }
+    }
+    
+    private lazy var tableView: LTTableView = {
+        let tableView = LTTableView(frame: CGRect(x: 0, y: 0, width: bounds.width, height: bounds.height),
+                                    style:.plain)
+        tableView.delegate = self
+        tableView.dataSource = self
+        tableView.showsVerticalScrollIndicator = false
+        tableView.separatorStyle = .none
+        registerCell(tableView, UITableViewCell.self)
+        return tableView
+    }()
+    
  }
  
- extension LTSimpleManager {
+ extension KFScrollableContainerView {
     private func setupTitleView() -> LTPageTitleView {
         let titleView = LTPageTitleView(frame: CGRect(x: 0, y: 0, width: bounds.width, height: layout.sliderHeight), titles: titles, layout: layout)
         return titleView
     }
  }
  
- extension LTSimpleManager {
+ extension KFScrollableContainerView {
     
     private func createPageViewConfig(currentViewController:UIViewController, layout: LTLayout, titleView: LTPageTitleView?) -> LTPageView {
         let pageView = LTPageView(frame: self.bounds, currentViewController: currentViewController, viewControllers: viewControllers, titles: titles, layout:layout, titleView: titleView)
@@ -142,7 +137,7 @@
     }
  }
  
- extension LTSimpleManager: LTPageViewDelegate {
+ extension KFScrollableContainerView: LTPageViewDelegate {
     
     public func glt_scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
         tableView.isScrollEnabled = false
@@ -154,7 +149,7 @@
     
  }
  
- extension LTSimpleManager {
+ extension KFScrollableContainerView {
     
     private func createSubViews() {
         backgroundColor = UIColor.white
@@ -185,20 +180,20 @@
     
  }
  
- extension LTSimpleManager {
+ extension KFScrollableContainerView {
     private func setupRefreshData()  {
         DispatchQueue.main.after(0.001) {
             UIView.animate(withDuration: 0.34, animations: {
                 self.tableView.contentInset = .zero
             })
             self.simpleRefreshTableViewHandle?(self.tableView, self.currentSelectIndex)
-            self.delegate?.glt_refreshScrollView?(self.tableView, self.currentSelectIndex)
+            self.delegate?.glt_refreshScrollView(self.tableView, self.currentSelectIndex)
         }
         
     }
  }
  
- extension LTSimpleManager {
+ extension KFScrollableContainerView {
     private func pageViewDidSelectConfig()  {
         pageView.didSelectIndexBlock = {[weak self] in
             guard let `self` = self else { return }
@@ -213,14 +208,14 @@
     }
  }
  
- extension LTSimpleManager: UITableViewDelegate {
+ extension KFScrollableContainerView: UITableViewDelegate {
     
     /*
      * 0 到 kHeaderHeight - hoverY 之间，滑动的是底部tableView，并且此时要将内容scrollView的contentoffset设置为0
      * 当 大于 kHeaderHeight - hoverY 的时候， 滑动的是内容ScrollView，此时将底部tableView的contentoffset y固定为kHeaderHeight - hoverY
      */
     public func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        delegate?.glt_scrollViewDidScroll?(scrollView)
+        delegate?.glt_scrollViewDidScroll(scrollView)
         guard scrollView == tableView, let contentTableView = contentTableView else { return }
         let offsetY = scrollView.contentOffset.y
         if contentTableView.contentOffset.y > 0 || offsetY > kHeaderHeight - hoverY {
@@ -236,28 +231,28 @@
     }
     
     public func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
-        delegate?.glt_scrollViewWillBeginDragging?(scrollView)
+        delegate?.glt_scrollViewWillBeginDragging(scrollView)
     }
     
     public func scrollViewWillBeginDecelerating(_ scrollView: UIScrollView) {
-        delegate?.glt_scrollViewWillBeginDecelerating?(scrollView)
+        delegate?.glt_scrollViewWillBeginDecelerating(scrollView)
     }
     
     public func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
-        delegate?.glt_scrollViewDidEndDecelerating?(scrollView)
+        delegate?.glt_scrollViewDidEndDecelerating(scrollView)
     }
     
     public func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
-        delegate?.glt_scrollViewDidEndDragging?(scrollView, willDecelerate: decelerate)
+        delegate?.glt_scrollViewDidEndDragging(scrollView, willDecelerate: decelerate)
     }
     
     public func scrollViewDidEndScrollingAnimation(_ scrollView: UIScrollView) {
-        delegate?.glt_scrollViewDidEndScrollingAnimation?(scrollView)
+        delegate?.glt_scrollViewDidEndScrollingAnimation(scrollView)
     }
     
  }
  
- extension LTSimpleManager: UITableViewDataSource, LTTableViewProtocal {
+ extension KFScrollableContainerView: UITableViewDataSource, LTTableViewProtocal {
     public func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return 1
     }
@@ -275,7 +270,7 @@
     }
  }
  
- extension LTSimpleManager {
+ extension KFScrollableContainerView {
     private func deallocConfig() {
         for viewController in viewControllers {
             viewController.glt_scrollView?.delegate = nil
@@ -284,7 +279,7 @@
  }
  
  //MARK: HeaderView设置
- extension LTSimpleManager {
+ extension KFScrollableContainerView {
     
     private func setupHeaderView(headerView: UIView) {
         //获取headerView的高度
