@@ -126,7 +126,6 @@ extension LTPageView {
 }
 
 extension LTPageView {
-    
     public func glt_createViewController(_ index: Int)  {
         let VC = viewControllers[index]
         guard let currentViewController = currentViewController else { return }
@@ -135,7 +134,10 @@ extension LTPageView {
         }
         var viewControllerY: CGFloat = 0.0
         layout.isSinglePageView ? viewControllerY = 0.0 : (viewControllerY = layout.sliderHeight)
-        VC.view.frame = CGRect(x: scrollView.bounds.width * CGFloat(index), y: viewControllerY, width: scrollView.bounds.width, height: scrollView.bounds.height)
+        VC.view.frame = CGRect(x: scrollView.bounds.width * CGFloat(index),
+                               y: viewControllerY,
+                               width: scrollView.bounds.width,
+                               height: scrollView.bounds.height)
         scrollView.addSubview(VC.view)
         currentViewController.addChildViewController(VC)
         VC.automaticallyAdjustsScrollViewInsets = false
@@ -155,11 +157,7 @@ extension LTPageView {
         let index = Int((scrollView.contentOffset.x + scrollView.bounds.width * 0.5) / scrollView.bounds.width)
         return max(0, index)
     }
-    
-}
 
-extension LTPageView {
-    
     private func getRGBWithColor(_ color : UIColor) -> (CGFloat, CGFloat, CGFloat) {
         guard let components = color.cgColor.components else {
             fatalError("请使用RGB方式给标题颜色赋值")
@@ -210,5 +208,3 @@ extension LTPageView: UIScrollViewDelegate {
         
     }
 }
-
-

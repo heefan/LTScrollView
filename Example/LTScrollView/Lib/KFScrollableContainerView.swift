@@ -9,17 +9,18 @@
  import UIKit
  
  public class KFScrollableContainerView: UIView {
+
     public typealias LTSimpleDidSelectIndexHandle = (Int) -> Void
+    public typealias LTSimpleRefreshTableViewHandle = (UIScrollView, Int) -> Void
+
     public weak var delegate: KFScrollableContainerViewDelegate?
     public var sampleDidSelectIndexHandle: LTSimpleDidSelectIndexHandle?
-    public typealias LTSimpleRefreshTableViewHandle = (UIScrollView, Int) -> Void
     public var simpleRefreshTableViewHandle: LTSimpleRefreshTableViewHandle?
 
     //设置悬停位置Y值
     public var hoverY: CGFloat = 0
 
     /* LTSimple的scrollView上下滑动监听 */
-
     private var contentTableView: UIScrollView?
     private var kHeaderHeight: CGFloat = 0.0
     private var headerView: UIView?
@@ -27,13 +28,14 @@
     private var titles: [String]
     private var layout: LTLayout
     private weak var currentViewController: UIViewController?
-    private var pageView: LTPageView!
     private var currentSelectIndex: Int = 0
+    private var titleView: LTPageTitleView!
+    private var pageView: LTPageView!
+
     var isCustomTitleView: Bool = false
 
-    private var titleView: LTPageTitleView!
-
-    public init(frame: CGRect, viewControllers: [UIViewController], titles: [String],
+    public init(frame: CGRect,
+                viewControllers: [UIViewController], titles: [String],
                 currentViewController:UIViewController,
                 layout: LTLayout,
                 titleView: LTPageTitleView? = nil) {
@@ -44,13 +46,15 @@
         self.currentViewController = currentViewController
         self.layout = layout
         super.init(frame: frame)
+
         layout.isSinglePageView = true
         if titleView != nil {
             isCustomTitleView = true
             self.titleView = titleView!
         }else {
-            self.titleView = setupTitleView()
+            self.titleView = setupTitleView()  // Pagination Control
         }
+
         self.titleView.isCustomTitleView = isCustomTitleView
         self.titleView.delegate = self
         pageView = createPageViewConfig(currentViewController: currentViewController, layout: layout, titleView: titleView)
@@ -121,15 +125,21 @@
  
  extension KFScrollableContainerView {
     private func setupTitleView() -> LTPageTitleView {
-        let titleView = LTPageTitleView(frame: CGRect(x: 0, y: 0, width: bounds.width, height: layout.sliderHeight), titles: titles, layout: layout)
+        let titleView = LTPageTitleView(frame: CGRect(x: 0, y: 0, width: bounds.width, height: layout.sliderHeight),
+                                        titles: titles,
+                                        layout: layout)
         return titleView
     }
- }
- 
- extension KFScrollableContainerView {
-    
-    private func createPageViewConfig(currentViewController:UIViewController, layout: LTLayout, titleView: LTPageTitleView?) -> LTPageView {
-        let pageView = LTPageView(frame: self.bounds, currentViewController: currentViewController, viewControllers: viewControllers, titles: titles, layout:layout, titleView: titleView)
+
+    private func createPageViewConfig(currentViewController:UIViewController,
+                                      layout: LTLayout,
+                                      titleView: LTPageTitleView?) -> LTPageView {
+        let pageView = LTPageView(frame: self.bounds,
+                                  currentViewController: currentViewController,
+                                  viewControllers: viewControllers,
+                                  titles: titles,
+                                  layout:layout,
+                                  titleView: titleView)
         if titles.count != 0 {
             pageView.glt_createViewController(0)
         }
